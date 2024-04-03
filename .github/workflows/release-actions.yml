@@ -2,10 +2,10 @@ name: Create release  # 指定名称
 
 on: 
   push:
-    # branches:
-    #   - master  # 在master分支推送代码时触发，新项目可能是main分支
-    tags:
-      - 'v*'  
+    branches:
+      - master  # 在master分支推送代码时触发，新项目可能是main分支
+    # tags:
+      # - 'v*'  
 
 # permissions:  # 指定需要的权限
 #   contents: write
@@ -27,7 +27,7 @@ jobs:
 
   build-tauri:
     needs: create-release
-    if: ${{ needs.create-release.outputs.release-created }}
+    # if: ${{ needs.create-release.outputs.release-created }}
 
     env:  # 指定GH_TOKEN，gh是GitHub自带的CLI，用于实现一些自动化任务，比如向Release上传构建产物等
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
