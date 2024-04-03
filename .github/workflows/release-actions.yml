@@ -1,104 +1,47 @@
-name: Create release  # 指定名称
+name: 'publish release'
 
-on: 
+# This will trigger the action on each push to the `release` branch.
+on:
   push:
     branches:
-      - master  # 在master分支推送代码时触发，新项目可能是main分支
-    # tags:
-      # - 'v*'  
-
-# permissions:  # 指定需要的权限
-#   contents: write
-#   pull-requests: write
+      - master
 
 jobs:
-  create-release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create release
-        id: release
-        uses: google-github-actions/release-please-action@v3  # 使用Release Please Action，并指定类型为node
-        with:
-          release-type: node
-          token: ${{ secrets.GITHUB_TOKEN }}  # 使用GitHub自动生成的token
-    outputs:  # 将输出暴露除去
-      release-created: ${{ steps.release.outputs.release_created }}
-      tag-name: ${{ steps.release.outputs.tag_name }}
-
-  build-tauri:
-    needs: create-release
-    # if: ${{ needs.create-release.outputs.release-created }}
-
-    env:  # 指定GH_TOKEN，gh是GitHub自带的CLI，用于实现一些自动化任务，比如向Release上传构建产物等
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    strategy:  # 1
+  publish-tauri:
+    permissions:
+      contents: write
+    strategy:
       fail-fast: false
-      matrix: 
+      matrix:
         platform: [macos-latest, ubuntu-20.04, windows-latest]
 
     runs-on: ${{ matrix.platform }}
-
     steps:
-      - name: Echo tag name
-        run: echo "Build Application ${{ needs.create-release.outputs.tag-name }} for platform ${{ matrix.platform }}."
+      - uses: actions/checkout@v4
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-      - name: Install dependencies(Ubuntu only)  # 安装Linux特定的依赖
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-20.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libayatana-appindicator3-dev librsvg2-dev
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Rust setup
-        uses: dtolnay/rust-toolchain@stable
+      - name: install frontend dependencies
+        run: yarn install # change this to npm or pnpm depending on which one you use
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: "./src-tauri -> target"
-
-      - name: Sync node version and setup cache
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          # cache: "npm"
-
-      - name: Install pnpm
-        run: npm i -g pnpm
-
-      - name: Install frontend dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Build Application
-        id: build
-        uses: tauri-apps/tauri-action@v0  # 使用tauri-action来构建应用
+      - uses: tauri-apps/tauri-action@v0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 传递GITHUB_TOKEN，这是必须的
-
-      # - name: Upload artifacts(Linux)
-      #   if: matrix.platform == 'ubuntu-20.04'
-      #   run: |  # 在这里使用竖线，将后面的每行代码通过\n连接起来
-      #     gh release upload ${{ needs.create-release.outputs.tag-name }} ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
-      #     gh release upload ${{ needs.create-release.outputs.tag-name }} ${{ github.workspace }}/src-tauri/target/release/bundle/appimage/*.AppImage
-
-      - name: Upload artifacts(macOS)
-        if: matrix.platform == 'macos-latest'
-        run: |
-          cd ${{ github.workspace }}/src-tauri/target/release/bundle/macos
-          zip -r tauri-app.app.zip tauri-app.app  # 在macOS中，xxx.app是一个文件夹，因此需要打包成一个压缩包
-          gh release upload ${{ needs.create-release.outputs.tag-name }} ${{ github.workspace }}/src-tauri/target/release/bundle/dmg/*.dmg
-          gh release upload ${{ needs.create-release.outputs.tag-name }} ${{ github.workspace }}/src-tauri/target/release/bundle/macos/*.app.zip
-
-      # - name: Upload artifacts(Windows)
-      #   if: matrix.platform == 'windows-latest'
-      #   run: |  # 2
-      #     Get-ChildItem -Path "${{ github.workspace }}\src-tauri\target\release\bundle\msi\*.msi" | ForEach-Object { 
-      #       gh release upload ${{ needs.create-release.outputs.tag-name }} $_.FullName 
-      #     }
-
-      #     Get-ChildItem -Path "${{ github.workspace }}\src-tauri\target\release\bundle\nsis\*.exe" | ForEach-Object { 
-      #       gh release upload ${{ needs.create-release.outputs.tag-name }} $_.FullName 
-      #     }
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
+          releaseName: 'App v__VERSION__'
+          releaseBody: 'See the assets to download this version and install.'
+          releaseDraft: true
+          prerelease: false
