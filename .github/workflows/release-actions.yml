@@ -67,7 +67,7 @@ jobs:
           cache: "yarn"
 
       - name: Install frontend dependencies
-        run: yarn install
+        run: npm install
 
       - name: Build Application
         id: build
