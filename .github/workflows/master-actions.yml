@@ -1,12 +1,21 @@
-name: test-github-actions  
-on: [push]  
-jobs:  
-  check-bats-version:  
-    runs-on: ubuntu-latest  
-    steps:  
-      - uses: actions/checkout@v2  
-      - uses: actions/setup-node@v2  
-        with:  
-          node-version: '16'  
-      - run: npm i
-      - run: npm -v  
+name: test-github-actions
+on:
+  push:
+    branches: [master] #监听master分支的push事件
+#   pull_request:
+#     branches: [master]
+
+jobs:
+  check-npm-version:
+    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+            node-version: [15.9.0] #指定node版本
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }} #使用action安装node环境
+      uses: actions/setup-node@v1
+      with:
+            node-version: ${{ matrix.node-version }}
+    - run: npm install #安装项目依赖
+    - run: npm -v #build项目
