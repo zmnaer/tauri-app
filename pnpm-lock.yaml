@@ -1,7 +1,6 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@rollup/rollup-darwin-arm64': ^4.13.2
   '@tauri-apps/api': ^1
   '@tauri-apps/cli': ^1
   solid-js: ^1.7.8
@@ -13,7 +12,6 @@ dependencies:
   solid-js: 1.8.16
 
 devDependencies:
-  '@rollup/rollup-darwin-arm64': 4.13.2
   '@tauri-apps/cli': 1.5.11
   vite: 5.2.7
   vite-plugin-solid: 2.10.2_solid-js@1.8.16+vite@5.2.7
@@ -477,12 +475,6 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
-    dev: true
-
-  /@rollup/rollup-darwin-arm64/4.13.2:
-    resolution: {integrity: sha512-mCMlpzlBgOTdaFs83I4XRr8wNPveJiJX1RLfv4hggyIVhfB5mJfN4P8Z6yKh+oE4Luz+qq1P3kVdWrCKcMYrrA==}
-    cpu: [arm64]
-    os: [darwin]
     dev: true
 
   /@rollup/rollup-linux-powerpc64le-gnu/4.14.0:
