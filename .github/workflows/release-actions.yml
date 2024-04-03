@@ -66,8 +66,11 @@ jobs:
           node-version: "20"
           # cache: "npm"
 
+      - name: Install pnpm
+        run: npm i -g pnpm
+
       - name: Install frontend dependencies
-        run: npm install
+        run: pnpm i
 
       - name: Build Application
         id: build
