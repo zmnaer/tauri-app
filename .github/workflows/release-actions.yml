@@ -78,27 +78,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 传递GITHUB_TOKEN，这是必须的
 
-      - name: Upload artifacts(Linux)
-        if: matrix.platform == 'ubuntu-20.04'
-        run: |  # 在这里使用竖线，将后面的每行代码通过\n连接起来
-          gh release upload ${{ needs.create-release.outputs.tag-name }} ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
-          gh release upload ${{ needs.create-release.outputs.tag-name }} ${{ github.workspace }}/src-tauri/target/release/bundle/appimage/*.AppImage
+      # - name: Upload artifacts(Linux)
+      #   if: matrix.platform == 'ubuntu-20.04'
+      #   run: |  # 在这里使用竖线，将后面的每行代码通过\n连接起来
+      #     gh release upload ${{ needs.create-release.outputs.tag-name }} ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
+      #     gh release upload ${{ needs.create-release.outputs.tag-name }} ${{ github.workspace }}/src-tauri/target/release/bundle/appimage/*.AppImage
 
       - name: Upload artifacts(macOS)
         if: matrix.platform == 'macos-latest'
         run: |
           cd ${{ github.workspace }}/src-tauri/target/release/bundle/macos
-          zip -r Application.app.zip Application.app  # 在macOS中，xxx.app是一个文件夹，因此需要打包成一个压缩包
+          zip -r tauri-app.app.zip tauri-app.app  # 在macOS中，xxx.app是一个文件夹，因此需要打包成一个压缩包
           gh release upload ${{ needs.create-release.outputs.tag-name }} ${{ github.workspace }}/src-tauri/target/release/bundle/dmg/*.dmg
           gh release upload ${{ needs.create-release.outputs.tag-name }} ${{ github.workspace }}/src-tauri/target/release/bundle/macos/*.app.zip
 
-      - name: Upload artifacts(Windows)
-        if: matrix.platform == 'windows-latest'
-        run: |  # 2
-          Get-ChildItem -Path "${{ github.workspace }}\src-tauri\target\release\bundle\msi\*.msi" | ForEach-Object { 
-            gh release upload ${{ needs.create-release.outputs.tag-name }} $_.FullName 
-          }
+      # - name: Upload artifacts(Windows)
+      #   if: matrix.platform == 'windows-latest'
+      #   run: |  # 2
+      #     Get-ChildItem -Path "${{ github.workspace }}\src-tauri\target\release\bundle\msi\*.msi" | ForEach-Object { 
+      #       gh release upload ${{ needs.create-release.outputs.tag-name }} $_.FullName 
+      #     }
 
-          Get-ChildItem -Path "${{ github.workspace }}\src-tauri\target\release\bundle\nsis\*.exe" | ForEach-Object { 
-            gh release upload ${{ needs.create-release.outputs.tag-name }} $_.FullName 
-          }
+      #     Get-ChildItem -Path "${{ github.workspace }}\src-tauri\target\release\bundle\nsis\*.exe" | ForEach-Object { 
+      #       gh release upload ${{ needs.create-release.outputs.tag-name }} $_.FullName 
+      #     }
