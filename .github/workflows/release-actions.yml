@@ -70,7 +70,7 @@ jobs:
         run: npm i -g pnpm
 
       - name: Install frontend dependencies
-        run: pnpm i
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build Application
         id: build
